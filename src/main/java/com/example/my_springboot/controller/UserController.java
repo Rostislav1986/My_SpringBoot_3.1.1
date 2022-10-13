@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 public class UserController {
@@ -18,54 +19,42 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
     @GetMapping("/")
-    public String users(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
+    public String allUsers(Model model){
+        List<User> user=userService.getAllUsers();
+        model.addAttribute("users",user);
         return "users";
     }
-
     @GetMapping("/{id}")
-    public String getUser (@PathVariable("id") long id, Model model) {
+    public String getUser(@PathVariable("id") long id, Model model) {
         model.addAttribute("user", userService.getUserById(id));
         return "user";
     }
 
     @GetMapping("/new")
-    public String addUser(User user) {
+    public String creatUserForm(User user) {
         return "create";
     }
-
-
     @PostMapping("/new")
-    public String add(@ModelAttribute("user") @Valid User user, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "create";
-        } else {
-            userService.addUser(user);
-            return "redirect:/";
-        }
+    public String createUser(User user){
+    userService.saveUser(user);
+    return "redirect:/";
     }
-
     @DeleteMapping("/delete/{id}")
     public String delete(@PathVariable("id") Long id) {
         userService.removeUser(id);
         return "redirect:/";
     }
-
     @GetMapping("edit/{id}")
     public String updateUser(@PathVariable("id") Long id, Model model) {
-        model.addAttribute(userService.getUserById(id));
+        User user = userService.getUserById(id);
+        model.addAttribute("user", user);
         return "edit";
     }
 
-    @PatchMapping("/edit")
-    public String update(@Valid User user, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "edit";
-        } else {
-            userService.addUser(user);
-            return "redirect:/";
-        }
+    @PostMapping("/edit")
+    public String updateUser(@Valid User user){
+        userService.saveUser(user);
+        return "redirect:/";
     }
 }
